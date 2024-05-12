@@ -74,9 +74,9 @@ def main():
     # news = get_news("Psychology")
     # print(news)
 
-    # chat = ChatAssistant()
+    chat = ChatAssistant()
 
-    manager = AssistantManager()
+    # manager = AssistantManager()
 
     # Streamlit frontend
 
@@ -87,28 +87,62 @@ def main():
         submit_btn = st.form_submit_button(label="Pokreni Assistent-a")
 
         if submit_btn:
-            manager.create_assistant(
+            chat.create_assistant(
                 name="News Summarizer",
                 instructions="Tvoj zadatak je da budes personalni asistent za korisnike koji zna da napravi kratak sazetak teksta iz spiska clankova",
                 tools=[
                     {
-                        
+                        "type":"function",
+                        "function":{
+                            "name": "get_news",
+                            "description": "Uzima listu clankova na zadatu temu koje mu proslijedi NewsAPI",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "topic": {
+                                        "type": "string",
+                                        "description": "Tema clanka novosti, npr. 'deep learning' "
+                                    }
+                                },
+                                "required": ["topic"],
+                            },
+                        },
                     }
                 ]
             )
 
+            chat.create_thread()
+
+            # Dodajem poruku i pokrecem asistenta
+            chat.add_msg_to_thread(
+                role="user",
+                content=f"napravi sazetak novosti na ovu temu: {instructions}"
+            )
+            chat.run_assistant(instructions="Napravi sazetak novosti")
+
+            # Ceka da se zavrsi proces
+
+            chat.wait_for_completed()
+
+            summary = chat.get_summary()
+
+            st.write(summary)
+
+            st.text("Debug log:")
+            st.code(chat.run_steps(), line_numbers=True)
+
 
 class ChatAssistant:
-    thread_id = None
-    assistant_id = None
+    thread_id = "thread_Tewm453iffuVWoqKvvaAz45d"
+    assistant_id = "asst_Q42qFA2YPAfmQUAwtRM1ah5o"
 
     # Glavni konstruktor za asistenta
 
-    def __init__(self, model: str= model):
+    def __init__(self, model: str = model):
         self.client = client
         self.model = model
-        self.assistant = None,
-        self.thread = None,
+        self.assistant = None
+        self.thread = None
         self.run = None
         self.summary = None
 
@@ -151,7 +185,7 @@ class ChatAssistant:
 
     def add_msg_to_thread(self, role, content):
         if self.thread:
-            self.client.beta.messages.create(
+            self.client.beta.threads.messages.create(
                 thread_id = self.thread.id,
                 role = role,
                 content = content
@@ -161,7 +195,7 @@ class ChatAssistant:
 
     def run_assistant(self, instructions):
         if self.thread and self.assistant:
-            self.run = self.client.beta.assistants.runs.create(
+            self.run = self.client.beta.threads.runs.create(
                 assistant_id = self.assistant.id,
                 thread_id = self.thread.id,
                 instructions = instructions
@@ -225,7 +259,7 @@ class ChatAssistant:
         if self.thread and self.run:
             while True:
                 time.sleep(5)
-                run_status = self.clent.beta.threads.runs.retrieve(
+                run_status = self.client.beta.threads.runs.retrieve(
                     thread_id = self.thread.id,
                     run_id = self.run.id
                 )
@@ -247,8 +281,8 @@ class ChatAssistant:
             thread_id=self.thread.id,
             run_id=self.run.id
         )
-
         print(f"Run-steps :::: {run_steps}")
+        return run_steps.data
 
 
 if __name__ == "__main__":
