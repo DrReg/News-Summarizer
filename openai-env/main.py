@@ -76,8 +76,6 @@ def main():
 
     chat = ChatAssistant()
 
-    # manager = AssistantManager()
-
     # Streamlit frontend
 
     st.title("News Summary")
