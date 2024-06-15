@@ -16,7 +16,7 @@ class ChatAssistant:
     # thread_id = "thread_Tewm453iffuVWoqKvvaAz45d"
     # assistant_id = "asst_Q42qFA2YPAfmQUAwtRM1ah5o"
 
-    thread_id = "thread_0AiD85unNVq5hB2S4cG2BSst"
+    thread_id = ""
     assistant_id = "asst_r9RondbWTKb0OOf96wvsEmZh"
 
     # Glavni konstruktor za asistenta
@@ -112,14 +112,16 @@ class ChatAssistant:
             arguments = json.loads(action["function"]["arguments"])
 
             if func_name == "get_news":
-                output = get_news(topic=arguments["topic"])
+                output = get_news(topic=arguments.get("topic"), 
+                                  category=arguments.get("category"), 
+                                  phrase=arguments.get("phrase"), 
+                                  date_filter=arguments.get("date_filter"))
                 print(f"Output funkcije :::: {output}")
                 final_str = ""
                 for item in output:
-                    final_str += "".join(item)
+                    final_str += "".join(item["title"] + " - " + item["description"] + "\n")
                 
-                tools_outputs.append({"tool_call_id": action["id"],
-                                    "output": final_str})
+                tools_outputs.append({"tool_call_id": action["id"], "output": final_str})
 
             else:
                 raise ValueError(f"Nepoznata funckija: {func_name}")
