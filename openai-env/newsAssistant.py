@@ -3,6 +3,7 @@ from dotenv import find_dotenv, load_dotenv
 import os
 import time 
 import json
+import requests
 
 # openai.api_key = os.environ.get("OPENAI_API_KEY") je default
 # Ovdje postavljam konfiguracije za instanciranje OpenAI assistent-a
@@ -40,8 +41,70 @@ class ChatAssistant:
             self.thread = self.client.beta.threads.retrieve(
                 thread_id = ChatAssistant.thread_id
             )
-    
-    # Metoda za kreiranje assistenta
+
+
+
+    # Pravim metodu koja poziva NewsAPI i vraca sta mu API kaze, ima i custom URL kojem mu prosljedjujem temu i API kljuc
+
+    # Ova metoda ima zadatak da salje zahtjev NewsAPI-ju i da samo vrati informacije iz clanaka u obliku teksta
+
+    def get_news(self, topic=None, category=None, phrase=None, date_filter=None):
+        base_url = "https://newsapi.org/v2/top-headlines"
+        params = {
+            "apiKey": news_api_key,
+            "country": "us",
+        }
+        if topic:
+            params["q"] = topic
+        if category:
+            params["category"] = category
+        if phrase:
+            params["qInTitle"] = phrase
+        if date_filter:
+            try:
+                if date_filter == "this_month":
+                    params["from"] = (datetime.now() - timedelta(days=datetime.now().day)).strftime("%Y-%m-%d")
+                    params["to"] = datetime.now().strftime("%Y-%m-%d")
+
+                elif date_filter == "this_year":
+                    params["from"] = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
+                    params["to"] = datetime.now().strftime("%Y-%m-%d")
+
+                elif date_filter == "ever":
+                    pass  # Nema potrebe da ovdje posebna logika bude napravljena
+
+                elif date_filter == "custom":
+                    start_date = st.date_input("Start Date")
+                    end_date = st.date_input("End Date")
+                    params["from"] = start_date.strftime("%Y-%m-%d")
+                    params["to"] = end_date.strftime("%Y-%m-%d")
+                    
+            except Exception as e:
+                st.error(f"Error pri procesu filtera: {str(e)}")
+                return []
+        
+        try:
+            response = requests.get(base_url, params=params)
+            response.raise_for_status()  # Postavi status error za los odgovor
+            articles = response.json().get("articles", [])
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"Error pri vracanju novih clankova: {str(e)}")
+            return []
+        
+        news_list = []
+
+        for article in articles:
+            news_item = {
+                "title": article["title"],
+                "description": article["description"],
+                "url": article["url"]
+            }
+            news_list.append(news_item)
+        
+        return news_list
+        
+        # Metoda za kreiranje assistenta
 
     def create_assistant(self, name, instructions, tools):
         if not self.assistant:
@@ -112,10 +175,11 @@ class ChatAssistant:
             arguments = json.loads(action["function"]["arguments"])
 
             if func_name == "get_news":
-                output = get_news(topic=arguments.get("topic"), 
-                                  category=arguments.get("category"), 
-                                  phrase=arguments.get("phrase"), 
-                                  date_filter=arguments.get("date_filter"))
+                output = self.get_news(
+                                    topic=arguments.get("topic"), 
+                                    category=arguments.get("category"), 
+                                    phrase=arguments.get("phrase"), 
+                                    date_filter=arguments.get("date_filter"))
                 print(f"Output funkcije :::: {output}")
                 final_str = ""
                 for item in output:
