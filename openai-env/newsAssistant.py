@@ -17,7 +17,7 @@ class ChatAssistant:
     # thread_id = "thread_Tewm453iffuVWoqKvvaAz45d"
     # assistant_id = "asst_Q42qFA2YPAfmQUAwtRM1ah5o"
 
-    thread_id = ""
+    thread_id = "thread_0AiD85unNVq5hB2S4cG2BSst"
     assistant_id = "asst_r9RondbWTKb0OOf96wvsEmZh"
 
     # Glavni konstruktor za asistenta
