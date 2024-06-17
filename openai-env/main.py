@@ -19,7 +19,7 @@ def main():
     categories = ["business", "entertainment", "general", "health", "science", "sports", "technology"]
 
     with st.form(key="user_input_form"):
-        instructions = st.text_input("Unesi tematiku:")
+        topic = st.text_input("Unesi tematiku:")
 
         # Opcioni filteri
         
@@ -58,6 +58,26 @@ def main():
                                     "topic": {
                                         "type": "string",
                                         "description": "Tema clanka novosti, npr. 'deep learning' "
+                                    },
+
+                                    "category": {
+                                        "type": "string",
+                                        "description": "Kategorija novosti, npr. 'zdravlje, zabava, sport"
+                                    },
+
+                                    "phrase": {
+                                        "type": "string",
+                                        "description": "Tačna fraza za pretragu u naslovu"
+                                    },
+
+                                    "start_date": {
+                                        "type": "string",
+                                        "description": "Pocetni datum od kojeg se prostire datumski filter"
+                                    },
+
+                                    "end_date": {
+                                        "type": "string",
+                                        "description": "Zavrsni datum do kojeg se prostire datumski filter"
                                     }
                                 },
                                 "required": ["topic"],
@@ -72,7 +92,7 @@ def main():
             # Dodajem poruku i pokrecem asistenta
             chat.add_msg_to_thread(
                 role="user",
-                content=f"napravi sazetak novosti na ovu temu: {instructions}"
+                content=f"napravi sazetak novosti na ovu temu: {topic}"
             )
             chat.run_assistant(instructions="Napravi sazetak novosti")
 

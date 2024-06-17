@@ -48,62 +48,63 @@ class ChatAssistant:
 
     # Ova metoda ima zadatak da salje zahtjev NewsAPI-ju i da samo vrati informacije iz clanaka u obliku teksta
 
-    def get_news(self, topic=None, category=None, phrase=None, date_filter=None):
-        base_url = "https://newsapi.org/v2/top-headlines"
-        params = {
-            "apiKey": news_api_key,
-            "country": "us",
-        }
-        if topic:
-            params["q"] = topic
+    def get_news(self, topic, category, phrase, start_date, end_date):
+
+        #Bazicni URL u slucaju da se samo vrsi pretraga po temi (default case)
+
+        url = (
+            f"https://newsapi.org/v2/everything?q={topic}&apiKey={news_api_key}&pageSize=5"
+        )
+
+        #U slucaju da filtera koje je korisnik izabrao, dodaju se na bazicni URL
+
         if category:
-            params["category"] = category
+            url += f"&category={category}"
         if phrase:
-            params["qInTitle"] = phrase
-        if date_filter:
-            try:
-                if date_filter == "this_month":
-                    params["from"] = (datetime.now() - timedelta(days=datetime.now().day)).strftime("%Y-%m-%d")
-                    params["to"] = datetime.now().strftime("%Y-%m-%d")
+            url += f"&qInTitle={phrase}"
+        if start_date:
+            url += f"&from={start_date}"
+        if end_date:
+            url += f"&to={end_date}"
 
-                elif date_filter == "this_year":
-                    params["from"] = datetime(datetime.now().year, 1, 1).strftime("%Y-%m-%d")
-                    params["to"] = datetime.now().strftime("%Y-%m-%d")
-
-                elif date_filter == "ever":
-                    pass  # Nema potrebe da ovdje posebna logika bude napravljena
-
-                elif date_filter == "custom":
-                    start_date = st.date_input("Start Date")
-                    end_date = st.date_input("End Date")
-                    params["from"] = start_date.strftime("%Y-%m-%d")
-                    params["to"] = end_date.strftime("%Y-%m-%d")
-                    
-            except Exception as e:
-                st.error(f"Error pri procesu filtera: {str(e)}")
-                return []
-        
         try:
-            response = requests.get(base_url, params=params)
-            response.raise_for_status()  # Postavi status error za los odgovor
-            articles = response.json().get("articles", [])
+            response = requests.get(url)
+            if response.status_code == 200:
+                news = json.dumps(response.json(), indent=4)
+                news_json = json.loads(news)
 
+                data = news_json
+
+                # Prolazim kroz JSON fajl odgovora i kupim podatke u varijable da bi ih kasnije obradio
+                
+                status = data["status"]
+                total_results = data["totalResults"]
+                articles = data.get("articles", [])
+
+                final_news = []
+
+                # articles je lista pa moram proci kroz sve elemente
+
+                for article in articles:
+                    news_item = {
+                        "title": article.get("title", ""),
+                        "description": article.get("description", ""),
+                        "url": article.get("url", ""),
+                        "content": article.get("content", ""),
+                        "source": article.get("source", {}).get("name", ""),
+                        "author": article.get("author", "")
+                    }
+
+                    final_news.append(news_item)
+
+
+                return final_news
+            else: 
+                return []
+            
         except requests.exceptions.RequestException as e:
-            st.error(f"Error pri vracanju novih clankova: {str(e)}")
-            return []
-        
-        news_list = []
-
-        for article in articles:
-            news_item = {
-                "title": article["title"],
-                "description": article["description"],
-                "url": article["url"]
-            }
-            news_list.append(news_item)
-        
-        return news_list
-        
+            print("Error pri NewsAPI key zahtjevu :( ", e)
+            
         # Metoda za kreiranje assistenta
 
     def create_assistant(self, name, instructions, tools):
@@ -176,11 +177,15 @@ class ChatAssistant:
 
             if func_name == "get_news":
                 output = self.get_news(
-                                    topic=arguments.get("topic"), 
-                                    category=arguments.get("category"), 
-                                    phrase=arguments.get("phrase"), 
-                                    date_filter=arguments.get("date_filter"))
+                    topic=arguments.get("topic"), 
+                    category=arguments.get("category"), 
+                    phrase=arguments.get("phrase"), 
+                    start_date=arguments.get("start_date"),
+                    end_date=arguments.get("end_date")
+                )
+
                 print(f"Output funkcije :::: {output}")
+                
                 final_str = ""
                 for item in output:
                     final_str += "".join(item["title"] + " - " + item["description"] + "\n")
@@ -223,7 +228,7 @@ class ChatAssistant:
                         required_actions = run_status.required_action.submit_tool_outputs.model_dump()
                     )
     
-    # Metoda koja izvrsava sve korake
+    # Metoda koja zapisuje sve korake za debug svrhe
 
     def run_steps(self):
         run_steps = self.client.beta.threads.runs.steps.list(
