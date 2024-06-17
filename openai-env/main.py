@@ -58,23 +58,7 @@ def main():
                                     "topic": {
                                         "type": "string",
                                         "description": "Tema clanka novosti, npr. 'deep learning' "
-                                    },
-
-                                    "category": {
-                                        "type": "string",
-                                        "description": "Kategorija novosti, npr. 'business' "
-                                    },
-
-                                    "phrase": {
-                                        "type": "string",
-                                        "description": "Tačna fraza za pretragu u naslovu"
-                                    },
-
-                                    "date_filter": {
-                                        "type": "string",
-                                        "description": "Filter za datum: this_month, this_year, ever, custom"
                                     }
-                                    
                                 },
                                 "required": ["topic"],
                             },
@@ -82,13 +66,6 @@ def main():
                     }
                 ]
             )
-
-            if selected_category:
-                tools[0]["function"]["parameters"]["properties"]["category"] = selected_category
-            if exact_phrase:
-                tools[0]["function"]["parameters"]["properties"]["phrase"] = exact_phrase
-            if selected_date_filter:
-                tools[0]["function"]["parameters"]["properties"]["date_filter"] = selected_date_filter
 
             chat.create_thread()
 
