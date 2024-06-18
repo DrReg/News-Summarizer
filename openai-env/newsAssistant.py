@@ -17,7 +17,7 @@ class ChatAssistant:
     # thread_id = "thread_Tewm453iffuVWoqKvvaAz45d"
     # assistant_id = "asst_Q42qFA2YPAfmQUAwtRM1ah5o"
 
-    thread_id = "thread_0AiD85unNVq5hB2S4cG2BSst"
+    thread_id = ""
     assistant_id = "asst_r9RondbWTKb0OOf96wvsEmZh"
 
     # Glavni konstruktor za asistenta
@@ -89,10 +89,10 @@ class ChatAssistant:
                     news_item = {
                         "title": article.get("title", ""),
                         "description": article.get("description", ""),
-                        "url": article.get("url", ""),
                         "content": article.get("content", ""),
                         "source": article.get("source", {}).get("name", ""),
-                        "author": article.get("author", "")
+                        "author": article.get("author", ""),
+                        "url": article.get("url", "")
                     }
 
                     final_news.append(news_item)
@@ -188,7 +188,7 @@ class ChatAssistant:
                 
                 final_str = ""
                 for item in output:
-                    final_str += "".join(item["title"] + " - " + item["description"] + "\n")
+                    final_str += "".join(item["title"] + " - " + item["description"] + " - " + item["content"] + " - " + item["url"] +" \n ")
                 
                 tools_outputs.append({"tool_call_id": action["id"], "output": final_str})
 

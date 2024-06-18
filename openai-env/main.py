@@ -92,9 +92,9 @@ def main():
             # Dodajem poruku i pokrecem asistenta
             chat.add_msg_to_thread(
                 role="user",
-                content=f"napravi sazetak novosti na ovu temu: {topic}"
+                content=f"napravi sazetak novosti na ovu temu = {topic}, ovu kategoriju = {selected_category}, ovu frazu = {exact_phrase}, ovaj pocetni datum pretrage = {start_date}, ovaj krajnji datum pretrage = {end_date} i poslije svakog sazetka prikazi Citaj jos link koji vodi na adresu clanka"
             )
-            chat.run_assistant(instructions="Napravi sazetak novosti")
+            chat.run_assistant(instructions="Napravi sazetak novosti i poslije svakog sazetka prikazi Citaj jos link koji vodi na adresu clanka")
 
             # Ceka da se zavrsi proces
 
