@@ -17,7 +17,7 @@ client = openai.OpenAI()
 model = "gpt-4-turbo"  # "gpt-3.5-turbo-16k"
 
 # Korak 1. Zakačićemo fajl u OpenAI embeddings ===
-filepath = "openai-env\cryptocurrency.pdf"
+filepath = "./cryptocurrency.pdf"
 file_object = client.files.create(file=open(filepath, "rb"), purpose="assistants")
 
 # Korak 2. - Kreiramo asistenta
