@@ -1,9 +1,6 @@
 import openai
-from dotenv import find_dotenv, load_dotenv
-import requests
-import json
 import streamlit as st
-from newsAssistant import ChatAssistant
+from newsSummarizer import ChatAssistant
 
 
 def main():

@@ -1,5 +1,5 @@
 import openai
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 import os
 import time 
 import json
