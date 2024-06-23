@@ -15,8 +15,8 @@ model = "gpt-4-1106-preview"  # "gpt-3.5-turbo-16k"
 
 # Ovi ID-jevi su trajno ukodirani jer prosto referenciraju ranije kreirani asistent
 
-thread_id = "thread_inGWHWAOfo3yxnwNZCophiXL"
-assis_id = "asst_KPhtBJnaLiJaYqGDqnoHn9oP"
+thread_id = "thread_SthmjLOdn1HjX1Ln1iB4tJHN"
+assis_id = "asst_2P4cB56F0TyNl1ETxWxD6nht"
 
 # Inicijalizacija chat sesije
 
@@ -56,18 +56,20 @@ if st.sidebar.button("Zakači fajl"):
             f.write(file_uploaded.getbuffer())
         another_file_id = upload_to_openai(f"{file_uploaded.name}")
         st.session_state.file_id_list.append(another_file_id)
-        st.sidebar.write(f"File ID:: {another_file_id}")
+        st.sidebar.write(f"File ID: {another_file_id}")
 
 # Prikaz file_id-jeva
-
 if st.session_state.file_id_list:
     st.sidebar.write("Uploaded File IDs:")
     for file_id in st.session_state.file_id_list:
         st.sidebar.write(file_id)
+        
         # Asocira svaki fajl sa asistentom
-        assistant_file = client.beta.assistants.files.create(
-            assistant_id=assis_id, file_id=file_id
+        vector_store_file = file = client.beta.vector_stores.files.create_and_poll(
+            vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",  # Replace with your actual vector store ID
+            file_id=file_id
         )
+        st.sidebar.write(f"Vector Store File ID: {vector_store_file.id}")
 
 # Dugme za inicijalizaciju chat sesije
 
