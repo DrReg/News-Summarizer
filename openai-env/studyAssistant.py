@@ -10,7 +10,7 @@ load_dotenv()
 
 client = openai.OpenAI()
 
-model = "gpt-4-1106-preview"  # "gpt-3.5-turbo-16k"
+model = "gpt-4-turbo"  # "gpt-3.5-turbo-16k"
 
 
 # Ovi ID-jevi su trajno ukodirani jer prosto referenciraju ranije kreirani asistent
@@ -54,9 +54,12 @@ if st.sidebar.button("Zakači fajl"):
     if file_uploaded:
         with open(f"{file_uploaded.name}", "wb") as f:
             f.write(file_uploaded.getbuffer())
-        another_file_id = upload_to_openai(f"{file_uploaded.name}")
-        st.session_state.file_id_list.append(another_file_id)
-        st.sidebar.write(f"File ID: {another_file_id}")
+        another_file = client.files.create(
+                            file=open(f"{file_uploaded.name}", "rb"),
+                            purpose='assistants'
+                        )
+        st.session_state.file_id_list.append(another_file.id)
+        st.sidebar.write(f"File ID: {another_file.id}")
 
 # Prikaz file_id-jeva
 if st.session_state.file_id_list:
@@ -65,7 +68,7 @@ if st.session_state.file_id_list:
         st.sidebar.write(file_id)
         
         # Asocira svaki fajl sa asistentom
-        vector_store_file = file = client.beta.vector_stores.files.create_and_poll(
+        vector_store_file = client.beta.vector_stores.files.create_and_poll(
             vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",  # Replace with your actual vector store ID
             file_id=file_id
         )
@@ -108,10 +111,10 @@ def process_message_with_citations(message):
         if file_citation := getattr(annotation, "file_citation", None):
             # Preuzima detalje o citiranom fajlu (ovde lažni odgovor pošto ne možemo da pozovemo OpenAI)
             cited_file = {
-                "filename": "cryptocurrency.pdf"
+                client.files.retrieve(file_citation.file_id)
             }  # Treba se zamijeniti pravim vracanjem fajla
             citations.append(
-                f'[{index + 1}] {file_citation.quote} from {cited_file["filename"]}'
+                f"[{index}] {cited_file.filename}"
             )
         elif file_path := getattr(annotation, "file_path", None):
             # Placeholder za file download citiranje
@@ -138,7 +141,7 @@ st.write("Learn fast by chatting with your documents")
 
 if st.session_state.start_chat:
     if "openai_model" not in st.session_state:
-        st.session_state.openai_model = "gpt-4-1106-preview"
+        st.session_state.openai_model = "gpt-4-turbo"
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
