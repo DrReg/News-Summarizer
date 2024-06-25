@@ -69,7 +69,7 @@ if st.session_state.file_id_list:
         
         # Asocira svaki fajl sa asistentom
         vector_store_file = client.beta.vector_stores.files.create_and_poll(
-            vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",  # Replace with your actual vector store ID
+            vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",
             file_id=file_id
         )
         st.sidebar.write(f"Vector Store File ID: {vector_store_file.id}")

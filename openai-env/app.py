@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Main entry point for the Streamlit app
+# Glavni ulaz na platformu asistenata
 query_params = st.query_params.get(key="page")
 
 if "page" in query_params:

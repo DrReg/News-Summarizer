@@ -2,10 +2,11 @@ import streamlit as st
 
 
 def main():
-    # Main page setup
+    # Glavni setup
     st.title("AI Learning Assistant Platform")
+    st.set_page_config(page_title="Research Assistants - Learn fast with us!", page_icon=":robot:")
 
-    # Create two columns for the cards
+    # Dvije kolone dugmadi
     col1, col2 = st.columns(2)
 
     with col1:
@@ -18,7 +19,7 @@ def main():
             st.session_state.page = "study_buddy"
             st.rerun()
 
-    # Redirection logic
+    # Logika za redirekciju na osnovu parametra iz URL-a
     if "page" in st.session_state:
         if st.session_state.page == "news_summarizer":
             st.write("Redirecting to News Summarizer...")
@@ -27,7 +28,7 @@ def main():
             st.write("Redirecting to Study Buddy...")
             st.query_params(page="study_buddy")
 
-    # Handle the query params for redirection
+    # Podesavanje parametara na osnovu kliknutih dugmadi
     query_params = st.query_params.get_all(key="page")
     st.write(query_params)
     if "page" in query_params:
