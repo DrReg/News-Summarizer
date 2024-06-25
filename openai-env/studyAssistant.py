@@ -109,10 +109,7 @@ def process_message_with_citations(message):
 
         # Getuje citate na osnovu fajla
         if file_citation := getattr(annotation, "file_citation", None):
-            # Preuzima detalje o citiranom fajlu (ovde lažni odgovor pošto ne možemo da pozovemo OpenAI)
-            cited_file = {
-                client.files.retrieve(file_citation.file_id)
-            }  # Treba se zamijeniti pravim vracanjem fajla
+            cited_file = client.files.retrieve(file_citation.file_id)
             citations.append(
                 f"[{index}] {cited_file.filename}"
             )
