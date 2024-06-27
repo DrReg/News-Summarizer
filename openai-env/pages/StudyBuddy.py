@@ -30,65 +30,12 @@ if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
 
 
-# Front end podešavanje
-
-st.set_page_config(page_title="Study Buddy - Chat and Learn", page_icon=":books:")
-
 
 # ==== Definicije funkcija =====
 def upload_to_openai(filepath):
     with open(filepath, "rb") as file:
         response = client.files.create(file=file.read(), purpose="assistants")
     return response.id
-
-
-# === Sidebar - gdje korisnici mogu zakačiti fajlove
-
-file_uploaded = st.sidebar.file_uploader(
-    "Zakači fajl da se pretvori u embeddings.", key="file_upload"
-)
-
-# Dugme za upload fajla, pravi file_id
-
-if st.sidebar.button("Zakači fajl"):
-    if file_uploaded:
-        with open(f"{file_uploaded.name}", "wb") as f:
-            f.write(file_uploaded.getbuffer())
-        another_file = client.files.create(
-                            file=open(f"{file_uploaded.name}", "rb"),
-                            purpose='assistants'
-                        )
-        st.session_state.file_id_list.append(another_file.id)
-        st.sidebar.write(f"File ID: {another_file.id}")
-
-# Prikaz file_id-jeva
-if st.session_state.file_id_list:
-    st.sidebar.write("Uploaded File IDs:")
-    for file_id in st.session_state.file_id_list:
-        st.sidebar.write(file_id)
-        
-        # Asocira svaki fajl sa asistentom
-        vector_store_file = client.beta.vector_stores.files.create_and_poll(
-            vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",
-            file_id=file_id
-        )
-        st.sidebar.write(f"Vector Store File ID: {vector_store_file.id}")
-
-# Dugme za inicijalizaciju chat sesije
-
-if st.sidebar.button("Pokreni chat..."):
-    if st.session_state.file_id_list:
-        st.session_state.start_chat = True
-
-        # Kreira nov thread za sesiju
-        chat_thread = client.beta.threads.create()
-        st.session_state.thread_id = chat_thread.id
-        st.write("Thread ID:", chat_thread.id)
-    else:
-        st.sidebar.warning(
-            "Nema pronađenih fajlova. Zakačite makar jedan fajl da biste počeli."
-        )
-
 
 # Funkcija za procesiranje poruke sa citatima
 
@@ -129,6 +76,59 @@ def process_message_with_citations(message):
 
 
 # Glavni interfejs
+
+
+# Front end podešavanje
+
+st.set_page_config(page_title="Study Buddy - Chat and Learn", page_icon=":books:")
+
+# === Sidebar - gdje korisnici mogu zakačiti fajlove
+
+file_uploaded = st.sidebar.file_uploader(
+    "Zakači fajl da se pretvori u embeddings.", key="file_upload"
+)
+
+# Dugme za upload fajla, pravi file_id
+
+if st.sidebar.button("Zakači fajl"):
+    if file_uploaded:
+        with open(f"{file_uploaded.name}", "wb") as f:
+            f.write(file_uploaded.getbuffer())
+        another_file = client.files.create(
+                            file=open(f"{file_uploaded.name}", "rb"),
+                            purpose='assistants'
+                        )
+        st.session_state.file_id_list.append(another_file.id)
+        st.sidebar.write(f"File ID: {another_file.id}")
+
+# Prikaz file_id-jeva
+if st.session_state.file_id_list:
+    st.sidebar.write("Uploaded File IDs:")
+    for file_id in st.session_state.file_id_list:
+        st.sidebar.write(file_id)
+            
+        # Asocira svaki fajl sa asistentom
+        vector_store_file = client.beta.vector_stores.files.create_and_poll(
+            vector_store_id="vs_OiVxJkWs0a7xSYyITRtiPqka",
+            file_id=file_id
+        )
+        st.sidebar.write(f"Vector Store File ID: {vector_store_file.id}")
+
+# Dugme za inicijalizaciju chat sesije
+
+if st.sidebar.button("Pokreni chat..."):
+    if st.session_state.file_id_list:
+        st.session_state.start_chat = True
+
+        # Kreira nov thread za sesiju
+        chat_thread = client.beta.threads.create()
+        st.session_state.thread_id = chat_thread.id
+        # st.write("Thread ID:", chat_thread.id)
+    else:
+        st.sidebar.warning(
+            "Nema pronađenih fajlova. Zakačite makar jedan fajl da biste počeli."
+        )
+
 
 st.title("Study Buddy")
 st.write("Learn fast by chatting with your documents")
@@ -199,6 +199,6 @@ if st.session_state.start_chat:
 
     else:
         # Opominje korisnika za chat
-        st.write(
-            "Molim Vas zakačite makar jedan fajl da biste mogli da pokrenete 'Pokreni Chat' dugme"
+        st.success(
+            "Napišite poruku i objasnite asistentu koji fajl treba da čita i šta želite da naučite!"
         )

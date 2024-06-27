@@ -249,9 +249,8 @@ def main():
     chat = ChatAssistant()
 
     # Streamlit frontend
-
+    st.set_page_config(page_title="News Summarizer - Get details quick", page_icon=":📝:")
     st.title("News Summary")
-    st.set_page_config(page_title="News Summarizer - Get details quick", page_icon=":paper:")
 
     categories = ["business", "entertainment", "general", "health", "science", "sports", "technology"]
 
