@@ -4,6 +4,7 @@ import os
 import time 
 import json
 import requests
+import datetime
 
 # openai.api_key = os.environ.get("OPENAI_API_KEY") je default
 # Ovdje postavljam konfiguracije za instanciranje OpenAI assistent-a
@@ -266,13 +267,30 @@ def main():
             date_filters = ["", "this_month", "this_year", "ever", "custom"]
             selected_date_filter = st.selectbox("Odaberi vremenski filter", date_filters)
 
-            if selected_date_filter == "custom":
+            today = datetime.date.today()
+
+            # Izracunaj pocetak trenutnog mjeseca
+
+            start_of_this_month = today.replace(day=1)
+
+            # Izracunaj pocetak trenutne godine
+
+            start_of_this_year = today.replace(month=1, day=1)
+        
+            if selected_date_filter == "this_month":
+                start_date = start_of_this_month
+                end_date = today
+            elif selected_date_filter == "this_year":
+                start_date = start_of_this_year
+                end_date = today
+            elif selected_date_filter == "custom":
                 st.write("Custom date range")
                 start_date = st.date_input("Start Date")
                 end_date = st.date_input("End Date")
             else:
                 start_date = None
                 end_date = None
+
 
             exact_phrase = st.text_input("Sadrži frazu: (opciono)")
 
@@ -330,7 +348,7 @@ def main():
                 role="user",
                 content=f"napravi sazetak novosti na ovu temu = {topic}, ovu kategoriju = {selected_category}, ovu frazu = {exact_phrase}, ovaj pocetni datum pretrage = {start_date}, ovaj krajnji datum pretrage = {end_date} i poslije svakog sazetka prikazi Citaj jos link koji vodi na adresu clanka"
             )
-            chat.run_assistant(instructions="Napravi sazetak novosti i poslije svakog sazetka prikazi Citaj jos link koji vodi na adresu clanka")
+            chat.run_assistant(instructions="Napravi sazetak istinitih novosti koje su se desile i poslije svakog sazetka prikazi Citaj jos link koji vodi na adresu clanka")
 
             # Ceka da se zavrsi proces
 

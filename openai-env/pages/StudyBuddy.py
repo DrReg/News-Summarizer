@@ -58,16 +58,8 @@ def process_message_with_citations(message):
         if file_citation := getattr(annotation, "file_citation", None):
             cited_file = client.files.retrieve(file_citation.file_id)
             citations.append(
-                f"[{index}] {cited_file.filename}"
+                f"[{index + 1}] {cited_file.filename}"
             )
-        elif file_path := getattr(annotation, "file_path", None):
-            # Placeholder za file download citiranje
-            cited_file = {
-                "filename": "cryptocurrency.pdf"
-            }  # TODO: Trebao bi zamijeniti sa pravim vracanjem fajla
-            citations.append(
-                f'[{index + 1}] Klikni [ovdje](#) za download {cited_file["filename"]}'
-            )  # Link za download bi trebao zamijeniti sa pravom putanjom do fajla
 
     # Dodaje fusnote na kraju odgovora
 
